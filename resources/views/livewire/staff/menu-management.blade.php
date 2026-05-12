@@ -7,6 +7,10 @@
         <flux:callout variant="danger" icon="x-circle" class="mb-4">{{ session('error') }}</flux:callout>
     @endif
 
+    @if (session('success'))
+        <flux:callout variant="success" icon="check-circle" class="mb-4">{{ session('success') }}</flux:callout>
+    @endif
+
     {{-- Tabs --}}
     <div class="mb-6 flex gap-2">
         <button wire:click="$set('activeTab', 'products')" @class([
@@ -88,30 +92,53 @@
 
         {{-- Product Modal --}}
         <flux:modal wire:model="showProductModal" class="max-w-lg md:min-w-lg">
-            <form wire:submit="saveProduct" class="space-y-4">
+            <form wire:submit.prevent="saveProduct" class="space-y-4">
                 <flux:heading size="lg">{{ $editingProductId ? 'Edit Product' : 'Add Product' }}</flux:heading>
 
-                <flux:input wire:model="productName" :label="__('Name')" required />
+                @if ($errors->any())
+                    <div class="rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
+                        <ul class="list-disc space-y-1 pl-5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-                <flux:select wire:model="productCategory" :label="__('Category')" placeholder="Select category..." required>
-                    @foreach ($categoryOptions as $cat)
-                        <flux:select.option value="{{ $cat->id }}">{{ $cat->name }}</flux:select.option>
-                    @endforeach
-                </flux:select>
+                <flux:input wire:model.defer="productName" :label="__('Name')" required />
+                @error('productName') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
 
-                <flux:textarea wire:model="productDescription" :label="__('Description')" rows="2" />
+                <div>
+                    <flux:select wire:model.defer="productCategory" :label="__('Category')" placeholder="Select category..." required>
+                        <flux:select.option value="">Select category...</flux:select.option>
+                        @foreach ($categoryOptions as $cat)
+                            <flux:select.option value="{{ $cat->id }}">{{ $cat->name }}</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                    @error('productCategory') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                </div>
+
+                <flux:textarea wire:model.defer="productDescription" :label="__('Description')" rows="2" />
+                @error('productDescription') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
 
                 <div class="grid grid-cols-2 gap-4">
-                    <flux:input wire:model="productPrice" :label="__('Price (₱)')" type="number" step="0.01" min="1" required />
-                    <flux:input wire:model="productStock" :label="__('Stock')" type="number" min="0" required />
+                    <div>
+                        <flux:input wire:model.defer="productPrice" :label="__('Price (₱)')" type="number" step="0.01" min="1" required />
+                        @error('productPrice') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <flux:input wire:model.defer="productStock" :label="__('Stock')" type="number" min="0" required />
+                        @error('productStock') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                    </div>
                 </div>
 
                 <flux:input wire:model="productImage" :label="__('Image')" type="file" accept="image/*" />
+                @error('productImage') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
 
-                <flux:checkbox wire:model="productAvailable" :label="__('Available for ordering')" />
+                <flux:checkbox wire:model.defer="productAvailable" :label="__('Available for ordering')" />
 
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="$set('showProductModal', false)" variant="ghost">Cancel</flux:button>
+                    <flux:button type="button" wire:click="$set('showProductModal', false)" variant="ghost">Cancel</flux:button>
                     <flux:button type="submit" variant="primary">{{ $editingProductId ? 'Update' : 'Create' }}</flux:button>
                 </div>
             </form>
@@ -162,14 +189,14 @@
 
         {{-- Category Modal --}}
         <flux:modal wire:model="showCategoryModal" class="max-w-md">
-            <form wire:submit="saveCategory" class="space-y-4">
+            <form wire:submit.prevent="saveCategory" class="space-y-4">
                 <flux:heading size="lg">{{ $editingCategoryId ? 'Edit Category' : 'Add Category' }}</flux:heading>
 
-                <flux:input wire:model="categoryName" :label="__('Name')" required />
-                <flux:checkbox wire:model="categoryActive" :label="__('Active')" />
+                <flux:input wire:model.defer="categoryName" :label="__('Name')" required />
+                <flux:checkbox wire:model.defer="categoryActive" :label="__('Active')" />
 
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="$set('showCategoryModal', false)" variant="ghost">Cancel</flux:button>
+                    <flux:button type="button" wire:click="$set('showCategoryModal', false)" variant="ghost">Cancel</flux:button>
                     <flux:button type="submit" variant="primary">{{ $editingCategoryId ? 'Update' : 'Create' }}</flux:button>
                 </div>
             </form>

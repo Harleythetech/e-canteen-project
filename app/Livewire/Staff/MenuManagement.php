@@ -6,7 +6,6 @@ use App\Models\Category;
 use App\Models\Product;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
@@ -23,33 +22,19 @@ class MenuManagement extends Component
     public bool $showProductModal = false;
     public ?int $editingProductId = null;
 
-    #[Validate('required|string|max:255')]
     public string $productName = '';
-
-    #[Validate('required|exists:categories,id')]
-    public ?int $productCategory = null;
-
-    #[Validate('nullable|string|max:500')]
+    public int|string|null $productCategory = '';
     public string $productDescription = '';
-
-    #[Validate('required|numeric|min:1|max:99999')]
-    public float $productPrice = 0;
-
-    #[Validate('required|integer|min:0')]
-    public int $productStock = 0;
-
-    #[Validate('nullable|image|max:2048')]
+    public string $productPrice = '';
+    public string $productStock = '';
     public $productImage = null;
-
     public bool $productAvailable = true;
 
     // Category form
     public bool $showCategoryModal = false;
     public ?int $editingCategoryId = null;
 
-    #[Validate('required|string|max:255', as: 'category name')]
     public string $categoryName = '';
-
     public bool $categoryActive = true;
 
     // Product CRUD
@@ -67,8 +52,8 @@ class MenuManagement extends Component
         $this->productName = $product->name;
         $this->productCategory = $product->category_id;
         $this->productDescription = $product->description ?? '';
-        $this->productPrice = (float) $product->price;
-        $this->productStock = $product->stock;
+        $this->productPrice = (string) $product->price;
+        $this->productStock = (string) $product->stock;
         $this->productAvailable = $product->is_available;
         $this->productImage = null;
         $this->showProductModal = true;
@@ -76,16 +61,36 @@ class MenuManagement extends Component
 
     public function saveProduct(): void
     {
-        $this->authorize('create', Product::class);
-        $this->validate();
+        $this->validate([
+            'productName'        => 'required|string|max:255',
+            'productCategory'    => 'required|exists:categories,id',
+            'productDescription' => 'nullable|string|max:500',
+            'productPrice'       => 'required|numeric|min:1|max:99999',
+            'productStock'       => 'required|integer|min:0',
+            'productImage'       => 'nullable|image|max:2048',
+        ], [], [
+            'productName'        => 'product name',
+            'productCategory'    => 'category',
+            'productDescription' => 'description',
+            'productPrice'       => 'price',
+            'productStock'       => 'stock',
+            'productImage'       => 'image',
+        ]);
+
+        if ($this->editingProductId) {
+            $this->authorize('update', Product::class);
+            $product = Product::findOrFail($this->editingProductId);
+        } else {
+            $this->authorize('create', Product::class);
+        }
 
         $data = [
-            'name' => $this->productName,
-            'slug' => Str::slug($this->productName),
-            'category_id' => $this->productCategory,
-            'description' => $this->productDescription ?: null,
-            'price' => $this->productPrice,
-            'stock' => $this->productStock,
+            'name'         => $this->productName,
+            'slug'         => Str::slug($this->productName),
+            'category_id'  => $this->productCategory,
+            'description'  => $this->productDescription ?: null,
+            'price'        => $this->productPrice,
+            'stock'        => $this->productStock,
             'is_available' => $this->productAvailable,
         ];
 
@@ -94,13 +99,15 @@ class MenuManagement extends Component
         }
 
         if ($this->editingProductId) {
-            Product::findOrFail($this->editingProductId)->update($data);
+            $product->update($data);
         } else {
+            $data['sort_order'] = Product::max('sort_order') + 1;
             Product::create($data);
         }
 
         $this->showProductModal = false;
         $this->resetProductForm();
+        session()->flash('success', 'Product saved successfully!');
     }
 
     public function toggleProductAvailability(int $id): void
@@ -173,10 +180,10 @@ class MenuManagement extends Component
     {
         $this->editingProductId = null;
         $this->productName = '';
-        $this->productCategory = null;
+        $this->productCategory = '';
         $this->productDescription = '';
-        $this->productPrice = 0;
-        $this->productStock = 0;
+        $this->productPrice = '';
+        $this->productStock = '';
         $this->productAvailable = true;
         $this->productImage = null;
         $this->resetValidation();
