@@ -100,14 +100,19 @@ new #[Title('Security settings')] class extends Component {
                 autocomplete="current-password"
                 viewable
             />
-            <flux:input
-                wire:model="password"
-                :label="__('New password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                viewable
-            />
+            <div>
+                <flux:input
+                    wire:model="password"
+                    :label="__('New password')"
+                    type="password"
+                    required
+                    autocomplete="new-password"
+                    viewable
+                />
+                <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    {{ __('Must be at least 8 characters and include uppercase, lowercase, a number, and a symbol.') }}
+                </p>
+            </div>
             <flux:input
                 wire:model="password_confirmation"
                 :label="__('Confirm password')"

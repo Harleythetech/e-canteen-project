@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire\Staff;
 
 use App\Models\Category;
 use App\Models\Product;
@@ -11,7 +11,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
 
-#[Layout('layouts::admin')]
+#[Layout('layouts::staff')]
 #[Title('Menu Management')]
 class MenuManagement extends Component
 {
@@ -192,7 +192,7 @@ class MenuManagement extends Component
 
     public function render()
     {
-        return view('livewire.admin.menu-management', [
+        return view('livewire.staff.menu-management', [
             'products' => Product::with('category')->orderBy('sort_order')->get(),
             'categories' => Category::withCount('products')->orderBy('sort_order')->get(),
             'categoryOptions' => Category::active()->orderBy('name')->get(),

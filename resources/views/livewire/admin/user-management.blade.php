@@ -102,7 +102,10 @@
 
             <flux:input wire:model="userPassword"
                 :label="$editingUserId ? __('New Password (leave blank to keep)') : __('Password')" type="password"
-                :required="!$editingUserId" />
+                :required="!$editingUserId" viewable />
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                {{ __('Must be at least 8 characters and include uppercase, lowercase, a number, and a symbol.') }}
+            </p>
 
             <flux:checkbox wire:model="userActive" :label="__('Active')" />
 

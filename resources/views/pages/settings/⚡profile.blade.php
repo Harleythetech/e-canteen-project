@@ -30,14 +30,11 @@ new #[Title('Profile settings')] class extends Component {
     {
         $user = Auth::user();
 
-        $validated = $this->validate($this->profileRules($user->id));
+        $validated = $this->validate([
+            'name' => $this->nameRules(),
+        ]);
 
         $user->fill($validated);
-
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
         $user->save();
 
         $this->dispatch('profile-updated', name: $user->name);
@@ -85,7 +82,11 @@ new #[Title('Profile settings')] class extends Component {
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" readonly disabled />
+
+                <flux:text class="mt-2 text-sm text-stone-500 dark:text-stone-400">
+                    {{ __('Your email address cannot be changed. Contact an administrator if you need to update it.') }}
+                </flux:text>
 
                 @if ($this->hasUnverifiedEmail)
                     <div>

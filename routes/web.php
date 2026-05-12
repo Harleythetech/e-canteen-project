@@ -26,12 +26,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::prefix('staff')->middleware(['auth', 'role:staff,admin'])->group(function () {
     Route::view('login', 'pages.auth.staff-login')->name('staff.login')->withoutMiddleware(['auth', 'role:staff,admin']);
     Route::livewire('/', 'staff.dashboard')->name('staff.dashboard');
+    Route::livewire('menu', 'staff.menu-management')->name('staff.menu');
 });
 
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::livewire('/', 'admin.overview')->name('admin.dashboard');
-    Route::livewire('menu', 'admin.menu-management')->name('admin.menu');
     Route::livewire('users', 'admin.user-management')->name('admin.users');
     Route::livewire('reports', 'admin.sales-reports')->name('admin.reports');
 });

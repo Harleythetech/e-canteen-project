@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -63,7 +64,7 @@ class UserManagement extends Component
     {
         $rules = [
             'userName' => ['required', 'string', 'max:255'],
-            'userEmail' => ['required', 'email', 'max:255'],
+            'userEmail' => ['required', 'email:rfc,dns', 'max:255'],
             'userRole' => ['required', 'in:student,staff,admin'],
             'userActive' => ['boolean'],
         ];
@@ -71,11 +72,11 @@ class UserManagement extends Component
         if ($this->editingUserId) {
             $rules['userEmail'][] = 'unique:users,email,' . $this->editingUserId;
             if ($this->userPassword) {
-                $rules['userPassword'] = ['string', 'min:8'];
+                $rules['userPassword'] = ['string', Password::defaults()];
             }
         } else {
             $rules['userEmail'][] = 'unique:users,email';
-            $rules['userPassword'] = ['required', 'string', 'min:8'];
+            $rules['userPassword'] = ['required', 'string', Password::defaults()];
         }
 
         $this->validate($rules);

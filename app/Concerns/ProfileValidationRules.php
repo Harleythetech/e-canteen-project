@@ -40,7 +40,7 @@ trait ProfileValidationRules
         return [
             'required',
             'string',
-            'email',
+            'email:rfc,dns',
             'max:255',
             $userId === null
                 ? Rule::unique(User::class)

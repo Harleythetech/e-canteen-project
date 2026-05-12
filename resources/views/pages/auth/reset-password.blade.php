@@ -21,15 +21,20 @@
             />
 
             <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                viewable
-            />
+            <div>
+                <flux:input
+                    name="password"
+                    :label="__('Password')"
+                    type="password"
+                    required
+                    autocomplete="new-password"
+                    :placeholder="__('Password')"
+                    viewable
+                />
+                <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    {{ __('Must be at least 8 characters and include uppercase, lowercase, a number, and a symbol.') }}
+                </p>
+            </div>
 
             <!-- Confirm Password -->
             <flux:input

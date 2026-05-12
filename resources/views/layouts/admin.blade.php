@@ -22,10 +22,6 @@
             </flux:sidebar.group>
 
             <flux:sidebar.group :heading="__('Management')" class="grid">
-                <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.menu')"
-                    :current="request()->routeIs('admin.menu')" wire:navigate>
-                    {{ __('Menu Management') }}
-                </flux:sidebar.item>
                 <flux:sidebar.item icon="users" :href="route('admin.users')"
                     :current="request()->routeIs('admin.users')" wire:navigate>
                     {{ __('User Management') }}

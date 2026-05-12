@@ -8,16 +8,16 @@ class ProductPolicy
 {
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 
     public function update(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 
     public function delete(User $user): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() || $user->isStaff();
     }
 }

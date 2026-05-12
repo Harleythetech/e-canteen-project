@@ -25,6 +25,13 @@
                     {{ __('Product Statistics') }}
                 </flux:sidebar.item>
             </flux:sidebar.group>
+
+            <flux:sidebar.group :heading="__('Management')" class="grid">
+                <flux:sidebar.item icon="squares-2x2" :href="route('staff.menu')"
+                    :current="request()->routeIs('staff.menu')" wire:navigate>
+                    {{ __('Menu Management') }}
+                </flux:sidebar.item>
+            </flux:sidebar.group>
         </flux:sidebar.nav>
 
         <flux:spacer />
