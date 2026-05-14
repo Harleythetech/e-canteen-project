@@ -73,6 +73,8 @@ class Checkout extends Component
 
         if (app(CartService::class)->isEmpty()) {
             $this->redirect(route('menu'), navigate: true);
+        } else {
+            $this->dispatch('toast', type: 'info', message: 'Item removed from cart.');
         }
     }
 
@@ -86,7 +88,7 @@ class Checkout extends Component
         $cart = app(CartService::class);
 
         if ($cart->isEmpty()) {
-            session()->flash('error', 'Your cart is empty.');
+            $this->dispatch('toast', type: 'error', message: 'Your cart is empty.');
             return;
         }
 
@@ -94,7 +96,7 @@ class Checkout extends Component
         foreach ($cart->items() as $productId => $item) {
             $product = Product::find($productId);
             if (!$product || !$product->is_available || $product->stock < $item['quantity']) {
-                session()->flash('error', "{$item['name']} is no longer available in the requested quantity.");
+                $this->dispatch('toast', type: 'error', message: "{$item['name']} is no longer available in the requested quantity.");
                 return;
             }
         }
@@ -146,7 +148,7 @@ class Checkout extends Component
             $order->items()->delete();
             $order->delete();
 
-            session()->flash('error', 'Payment processing failed. Please try again.');
+            $this->dispatch('toast', type: 'error', message: 'Payment processing failed. Please try again.');
         }
     }
 

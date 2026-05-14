@@ -34,6 +34,10 @@ class Dashboard extends Component
 
         if ($nextStatus && $order->canTransitionTo($nextStatus)) {
             $order->transitionTo($nextStatus);
+            $label = ucfirst($nextStatus);
+            $this->dispatch('toast', type: 'success', message: "Order {$order->order_number} marked as {$label}.");
+        } else {
+            $this->dispatch('toast', type: 'error', message: 'Could not advance order status.');
         }
     }
 

@@ -26,6 +26,9 @@ class OrderStatus extends Component
 
         if ($this->order->canTransitionTo('cancelled')) {
             $this->order->transitionTo('cancelled');
+            $this->dispatch('toast', type: 'info', message: 'Your order has been cancelled.');
+        } else {
+            $this->dispatch('toast', type: 'error', message: 'This order cannot be cancelled.');
         }
     }
 

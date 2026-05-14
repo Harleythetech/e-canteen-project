@@ -112,6 +112,7 @@
         </div>
     </nav>
 
+    <x-toast />
     @fluxScripts
 </body>
 

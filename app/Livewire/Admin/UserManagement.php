@@ -93,6 +93,7 @@ class UserManagement extends Component
             }
 
             $user->save();
+            $this->dispatch('toast', type: 'success', message: 'User updated successfully!');
         } else {
             User::create([
                 'name' => $this->userName,
@@ -101,6 +102,7 @@ class UserManagement extends Component
                 'is_active' => $this->userActive,
                 'password' => bcrypt($this->userPassword),
             ]);
+            $this->dispatch('toast', type: 'success', message: 'User created successfully!');
         }
 
         $this->showModal = false;
@@ -111,12 +113,14 @@ class UserManagement extends Component
         $user = User::findOrFail($id);
 
         if ($user->id === auth()->id()) {
-            session()->flash('error', 'You cannot deactivate your own account.');
+            $this->dispatch('toast', type: 'error', message: 'You cannot deactivate your own account.');
             return;
         }
 
         $user->is_active = !$user->is_active;
         $user->save();
+        $status = $user->is_active ? 'activated' : 'deactivated';
+        $this->dispatch('toast', type: 'success', message: "{$user->name} has been {$status}.");
     }
 
     public function render()

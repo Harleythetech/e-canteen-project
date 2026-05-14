@@ -3,14 +3,6 @@
         <flux:heading size="xl">Menu Management</flux:heading>
     </div>
 
-    @if (session('error'))
-        <flux:callout variant="danger" icon="x-circle" class="mb-4">{{ session('error') }}</flux:callout>
-    @endif
-
-    @if (session('success'))
-        <flux:callout variant="success" icon="check-circle" class="mb-4">{{ session('success') }}</flux:callout>
-    @endif
-
     {{-- Tabs --}}
     <div class="mb-6 flex gap-2">
         <button wire:click="$set('activeTab', 'products')" @class([

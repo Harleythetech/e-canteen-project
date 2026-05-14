@@ -100,26 +100,33 @@ class MenuManagement extends Component
 
         if ($this->editingProductId) {
             $product->update($data);
+            $message = 'Product updated successfully!';
         } else {
             $data['sort_order'] = Product::max('sort_order') + 1;
             Product::create($data);
+            $message = 'Product created successfully!';
         }
 
         $this->showProductModal = false;
         $this->resetProductForm();
-        session()->flash('success', 'Product saved successfully!');
+        $this->dispatch('toast', type: 'success', message: $message);
     }
 
     public function toggleProductAvailability(int $id): void
     {
         $product = Product::findOrFail($id);
         $product->update(['is_available' => !$product->is_available]);
+        $status = $product->is_available ? 'available' : 'unavailable';
+        $this->dispatch('toast', type: 'success', message: "{$product->name} marked as {$status}.");
     }
 
     public function deleteProduct(int $id): void
     {
         $this->authorize('delete', Product::class);
-        Product::findOrFail($id)->delete();
+        $product = Product::findOrFail($id);
+        $name = $product->name;
+        $product->delete();
+        $this->dispatch('toast', type: 'success', message: "{$name} deleted.");
     }
 
     // Category CRUD
@@ -153,13 +160,16 @@ class MenuManagement extends Component
 
         if ($this->editingCategoryId) {
             Category::findOrFail($this->editingCategoryId)->update($data);
+            $message = 'Category updated successfully!';
         } else {
             $data['sort_order'] = Category::max('sort_order') + 1;
             Category::create($data);
+            $message = 'Category created successfully!';
         }
 
         $this->showCategoryModal = false;
         $this->resetCategoryForm();
+        $this->dispatch('toast', type: 'success', message: $message);
     }
 
     public function deleteCategory(int $id): void
@@ -167,11 +177,13 @@ class MenuManagement extends Component
         $category = Category::findOrFail($id);
 
         if ($category->products()->count() > 0) {
-            session()->flash('error', 'Cannot delete a category that has products.');
+            $this->dispatch('toast', type: 'error', message: 'Cannot delete a category that has products.');
             return;
         }
 
+        $name = $category->name;
         $category->delete();
+        $this->dispatch('toast', type: 'success', message: "{$name} deleted.");
     }
 
     // Form resets

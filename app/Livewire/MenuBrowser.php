@@ -21,22 +21,25 @@ class MenuBrowser extends Component
 
     public function addToCart(int $productId, int $quantity = 1): void
     {
+        $product = \App\Models\Product::find($productId);
         app(CartService::class)->add($productId, $quantity);
-
         $this->dispatch('cart-updated');
+        $name = $product?->name ?? 'Item';
+        $this->dispatch('toast', type: 'success', message: "{$name} added to cart.");
     }
 
     public function removeFromCart(int $productId): void
     {
+        $product = \App\Models\Product::find($productId);
         app(CartService::class)->remove($productId);
-
         $this->dispatch('cart-updated');
+        $name = $product?->name ?? 'Item';
+        $this->dispatch('toast', type: 'info', message: "{$name} removed from cart.");
     }
 
     public function updateCartQuantity(int $productId, int $quantity): void
     {
         app(CartService::class)->update($productId, $quantity);
-
         $this->dispatch('cart-updated');
     }
 

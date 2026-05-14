@@ -74,6 +74,7 @@
 
     {{ $slot }}
 
+    <x-toast />
     @fluxScripts
 </body>
 

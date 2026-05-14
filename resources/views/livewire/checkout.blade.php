@@ -4,12 +4,6 @@
         <flux:subheading>Review your order and complete payment</flux:subheading>
     </div>
 
-    @if (session('error'))
-        <flux:callout variant="danger" icon="exclamation-triangle" class="mb-6">
-            {{ session('error') }}
-        </flux:callout>
-    @endif
-
     <div class="grid gap-6 lg:grid-cols-5">
         {{-- Order items --}}
         <div class="lg:col-span-3">
