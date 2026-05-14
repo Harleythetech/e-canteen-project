@@ -19,6 +19,11 @@ class Dashboard extends Component
     public string $statusFilter = 'active';
     public string $scannedCode = '';
 
+    public function refreshOrders(): void
+    {
+        // Triggers a re-render without resetting any state.
+    }
+
     public function advanceOrder(int $orderId): void
     {
         $order = Order::findOrFail($orderId);
