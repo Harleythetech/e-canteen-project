@@ -45,7 +45,7 @@
     </header>
 
     {{-- Page content — plain <main>, no flux:main to avoid sidebar offset --}}
-    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-8">
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 pb-32 lg:pb-8" style="padding-bottom: max(8rem, calc(4rem + env(safe-area-inset-bottom)));">
         {{ $slot }}
     </main>
 
@@ -53,8 +53,8 @@
     @php $cartCount = app(\App\Services\CartService::class)->count(); @endphp
     <nav class="lg:hidden" x-data
         x-bind:style="($flux.appearance === 'dark' || ($flux.appearance === 'system' && $flux.dark))
-            ? 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#27272a;border-top:1px solid #3f3f46;'
-            : 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#ffffff;border-top:1px solid #e4e4e7;'">
+            ? 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#27272a;border-top:1px solid #3f3f46;padding-bottom:env(safe-area-inset-bottom);'
+            : 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#ffffff;border-top:1px solid #e4e4e7;padding-bottom:env(safe-area-inset-bottom);'">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);height:4rem;">
 
             {{-- Menu --}}
