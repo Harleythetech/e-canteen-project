@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Order;
+use App\Services\PayMongoService;
 use App\Services\QrCodeService;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -14,10 +15,23 @@ class OrderStatus extends Component
 {
     public Order $order;
 
-    public function mount(Order $order): void
+    public function mount(Order $order, PayMongoService $payMongoService): void
     {
         $this->authorize('view', $order);
         $this->order = $order->load('items');
+
+        // If the order is still pending and has a checkout session,
+        // poll PayMongo to see if payment went through.
+        if ($order->status === 'pending' && $order->paymongo_checkout_id) {
+            try {
+                $paid = $payMongoService->confirmCheckoutSession($order);
+                if ($paid) {
+                    $this->order->refresh();
+                }
+            } catch (\Throwable) {
+                // Non-fatal — order status stays as-is
+            }
+        }
     }
 
     public function cancelOrder(): void
@@ -25,7 +39,8 @@ class OrderStatus extends Component
         $this->authorize('cancel', $this->order);
 
         if ($this->order->canTransitionTo('cancelled')) {
-            $this->order->transitionTo('cancelled');
+            $this->order->load('items')->cancelAndRestoreStock();
+            $this->order->refresh();
             $this->dispatch('toast', type: 'info', message: 'Your order has been cancelled.');
         } else {
             $this->dispatch('toast', type: 'error', message: 'This order cannot be cancelled.');

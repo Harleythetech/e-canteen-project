@@ -57,6 +57,17 @@ class Checkout extends Component
 
     public function mount()
     {
+        // Cancel any abandoned pending orders for this user.
+        // This fires when the user navigates back to checkout after
+        // leaving PayMongo without paying (GCash/Maya expire, GrabPay cancel, etc.)
+        Order::where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->whereNotNull('paymongo_checkout_id')
+            ->where('created_at', '<=', now()->subMinutes(5))
+            ->with('items')
+            ->get()
+            ->each(fn(Order $order) => $order->cancelAndRestoreStock());
+
         if (app(CartService::class)->isEmpty()) {
             $this->redirect(route('menu'), navigate: true);
         }
@@ -132,7 +143,7 @@ class Checkout extends Component
             $session = $payMongo->createCheckoutSession(
                 $order->load('items'),
                 route('orders.confirmed', $order),
-                route('checkout'),
+                route('orders.payment-cancelled', $order),
             );
 
             $order->update(['paymongo_checkout_id' => $session['checkout_id']]);

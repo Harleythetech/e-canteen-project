@@ -71,6 +71,32 @@ class Order extends Model
         return in_array($newStatus, self::TRANSITIONS[$this->status] ?? [], true);
     }
 
+    /**
+     * Cancel this order and restore stock for all items.
+     * Safe to call multiple times — checks status first.
+     */
+    public function cancelAndRestoreStock(): bool
+    {
+        if ($this->status !== 'pending') {
+            return false;
+        }
+
+        $this->update(['status' => 'cancelled']);
+
+        foreach ($this->items as $item) {
+            if ($item->product_id) {
+                \App\Models\Product::where('id', $item->product_id)
+                    ->increment('stock', $item->quantity);
+            }
+        }
+
+        \Illuminate\Support\Facades\Log::info('Order cancelled and stock restored', [
+            'order_number' => $this->order_number,
+        ]);
+
+        return true;
+    }
+
     public function transitionTo(string $newStatus): bool
     {
         if (!$this->canTransitionTo($newStatus)) {

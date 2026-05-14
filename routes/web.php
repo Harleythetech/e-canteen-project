@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PaymentCancelController;
 use App\Http\Controllers\PayMongoWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('orders', 'order-history')->name('orders.index');
     Route::livewire('orders/{order}', 'order-status')->name('orders.show');
     Route::livewire('orders/{order}/confirmed', 'order-confirmed')->name('orders.confirmed');
+    Route::get('orders/{order}/payment-cancelled', PaymentCancelController::class)->name('orders.payment-cancelled');
 });
 
 // Staff routes

@@ -70,6 +70,79 @@ class PayMongoService
     }
 
     /**
+     * Poll PayMongo to check if a checkout session has been paid.
+     * Used as a reliable fallback when the webhook hasn't fired yet.
+     * Returns true if the order was updated to paid.
+     */
+    public function confirmCheckoutSession(Order $order): bool
+    {
+        $response = Http::withBasicAuth(config('paymongo.secret_key'), '')
+            ->timeout(15)
+            ->get("{$this->baseUrl}/checkout_sessions/{$order->paymongo_checkout_id}");
+
+        if (!$response->successful()) {
+            Log::warning('PayMongo: failed to fetch checkout session', [
+                'order_number' => $order->order_number,
+                'status'       => $response->status(),
+                'body'         => $response->json(),
+            ]);
+            return false;
+        }
+
+        $attributes = $response->json('data.attributes');
+
+        // Log the full attributes so we can see exactly what PayMongo returns
+        Log::info('PayMongo: checkout session polled', [
+            'order_number'   => $order->order_number,
+            'checkout_id'    => $order->paymongo_checkout_id,
+            'status'         => $attributes['status'] ?? null,
+            'payment_status' => $attributes['payment_status'] ?? null,
+            'payments_count' => count($attributes['payments'] ?? []),
+        ]);
+
+        // PayMongo checkout session is paid when:
+        // - status = 'completed'  (documented but not always set)
+        // - payment_status = 'paid'  (not always present)
+        // - payments array has at least one entry with status 'paid'
+        //   (this is the reliable signal — confirmed via test logs)
+        $sessionStatus  = $attributes['status'] ?? null;
+        $paymentStatus  = $attributes['payment_status'] ?? null;
+        $payments       = $attributes['payments'] ?? [];
+        $firstPayStatus = $payments[0]['attributes']['status'] ?? $payments[0]['status'] ?? null;
+
+        $isPaid = $sessionStatus === 'completed'
+            || $paymentStatus === 'paid'
+            || $firstPayStatus === 'paid';
+
+        if (!$isPaid) {
+            return false;
+        }
+
+        // Already processed — idempotent
+        if ($order->paid_at !== null) {
+            return false;
+        }
+
+        $paymentId     = $payments[0]['id'] ?? null;
+        $paymentMethod = $attributes['payment_method_used'] ?? null;
+
+        $order->update([
+            'status'               => 'paid',
+            'paid_at'              => now(),
+            'paymongo_payment_id'  => $paymentId,
+            'payment_method'       => $paymentMethod,
+        ]);
+
+        Log::info('PayMongo: payment confirmed via polling', [
+            'order_number'   => $order->order_number,
+            'payment_id'     => $paymentId,
+            'payment_method' => $paymentMethod,
+        ]);
+
+        return true;
+    }
+
+    /**
      * Verify webhook signature and parse event using the official SDK.
      */
     public function verifyWebhook(string $payload, string $signatureHeader): object
@@ -87,11 +160,17 @@ class PayMongoService
      */
     public function handlePaymentPaid(object $event): bool
     {
-        $checkoutId = $event->resource['data']['id'] ?? null;
+        // The PayMongo webhook event wraps the checkout session under data.attributes
+        // Try multiple paths since SDK versions differ in how they expose the payload
+        $checkoutId = $event->data->id
+            ?? $event->data->attributes->data->id
+            ?? $event->resource['data']['id']
+            ?? null;
 
         if (!$checkoutId) {
             Log::warning('PayMongo webhook: missing checkout ID in event', [
                 'event_id' => $event->id ?? 'unknown',
+                'event_data' => json_encode($event),
             ]);
             return false;
         }
@@ -113,18 +192,27 @@ class PayMongoService
             return false;
         }
 
-        $paymentId = $event->resource['data']['attributes']['payments'][0]['id'] ?? null;
+        // Extract payment details — try both SDK object and array access
+        $payments = $event->data->attributes->payments
+            ?? $event->resource['data']['attributes']['payments']
+            ?? [];
+
+        $paymentId = is_array($payments) ? ($payments[0]['id'] ?? null) : ($payments[0]->id ?? null);
+
+        $paymentMethod = $event->data->attributes->payment_method_used
+            ?? $event->resource['data']['attributes']['payment_method_used']
+            ?? null;
 
         $order->update([
-            'status' => 'paid',
-            'paid_at' => now(),
+            'status'              => 'paid',
+            'paid_at'             => now(),
             'paymongo_payment_id' => $paymentId,
-            'payment_method' => $event->resource['data']['attributes']['payment_method_used'] ?? null,
+            'payment_method'      => $paymentMethod,
         ]);
 
         Log::info('PayMongo webhook: payment confirmed', [
             'order_number' => $order->order_number,
-            'payment_id' => $paymentId,
+            'payment_id'   => $paymentId,
         ]);
 
         return true;

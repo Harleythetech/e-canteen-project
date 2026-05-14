@@ -4,6 +4,12 @@
         <flux:subheading>Review your order and complete payment</flux:subheading>
     </div>
 
+    @if (session('payment_cancelled'))
+        <flux:callout variant="warning" icon="exclamation-triangle" class="mb-6">
+            {{ session('payment_cancelled') }}
+        </flux:callout>
+    @endif
+
     <div class="grid gap-6 lg:grid-cols-5">
         {{-- Order items --}}
         <div class="lg:col-span-3">
