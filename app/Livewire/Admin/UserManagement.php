@@ -18,6 +18,9 @@ class UserManagement extends Component
     public string $search = '';
 
     public bool $showModal = false;
+    public bool $showDeleteModal = false;
+    public ?int $deletingUserId = null;
+    public string $deletingUserName = '';
     public ?int $editingUserId = null;
     public string $userName = '';
     public string $userEmail = '';
@@ -50,6 +53,11 @@ class UserManagement extends Component
 
     public function editUser(int $id): void
     {
+        if ($id === auth()->id()) {
+            $this->dispatch('toast', type: 'error', message: 'You cannot edit your own account here.');
+            return;
+        }
+
         $user = User::findOrFail($id);
         $this->editingUserId = $user->id;
         $this->userName = $user->name;
@@ -106,6 +114,37 @@ class UserManagement extends Component
         }
 
         $this->showModal = false;
+    }
+
+    public function deleteUser(int $id): void
+    {
+        if ($id === auth()->id()) {
+            $this->dispatch('toast', type: 'error', message: 'You cannot delete your own account.');
+            return;
+        }
+
+        $user = User::findOrFail($id);
+        $name = $user->name;
+        $user->delete();
+
+        $this->showDeleteModal = false;
+        $this->deletingUserId = null;
+        $this->deletingUserName = '';
+
+        $this->dispatch('toast', type: 'success', message: "{$name} has been deleted.");
+    }
+
+    public function confirmDeleteUser(int $id): void
+    {
+        if ($id === auth()->id()) {
+            $this->dispatch('toast', type: 'error', message: 'You cannot delete your own account.');
+            return;
+        }
+
+        $user = User::findOrFail($id);
+        $this->deletingUserId = $user->id;
+        $this->deletingUserName = $user->name;
+        $this->showDeleteModal = true;
     }
 
     public function toggleActive(int $id): void

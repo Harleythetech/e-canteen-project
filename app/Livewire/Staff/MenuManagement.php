@@ -37,6 +37,12 @@ class MenuManagement extends Component
     public string $categoryName = '';
     public bool $categoryActive = true;
 
+    // Delete confirmation
+    public bool $showDeleteModal = false;
+    public ?int $deletingId = null;
+    public string $deletingName = '';
+    public string $deletingType = ''; // 'product' or 'category'
+
     // Product CRUD
 
     public function createProduct(): void
@@ -130,6 +136,30 @@ class MenuManagement extends Component
         $product->update(['is_available' => !$product->is_available]);
         $status = $product->is_available ? 'available' : 'unavailable';
         $this->dispatch('toast', type: 'success', message: "{$product->name} marked as {$status}.");
+    }
+
+    public function confirmDelete(int $id, string $type): void
+    {
+        $this->deletingId = $id;
+        $this->deletingType = $type;
+        $this->deletingName = $type === 'product'
+            ? Product::findOrFail($id)->name
+            : Category::findOrFail($id)->name;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteConfirmed(): void
+    {
+        if ($this->deletingType === 'product') {
+            $this->deleteProduct($this->deletingId);
+        } else {
+            $this->deleteCategory($this->deletingId);
+        }
+
+        $this->showDeleteModal = false;
+        $this->deletingId = null;
+        $this->deletingName = '';
+        $this->deletingType = '';
     }
 
     public function deleteProduct(int $id): void

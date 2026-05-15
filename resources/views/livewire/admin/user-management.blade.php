@@ -61,15 +61,25 @@
                                 </flux:badge>
                             </td>
                             <td class="px-4 py-3">
-                                <button wire:click="toggleActive({{ $user->id }})" class="cursor-pointer">
+                                @if ($user->id === auth()->id())
                                     <flux:badge :color="$user->is_active ? 'green' : 'red'" size="sm">
                                         {{ $user->is_active ? 'Active' : 'Inactive' }}
                                     </flux:badge>
-                                </button>
+                                @else
+                                    <button wire:click="toggleActive({{ $user->id }})" class="cursor-pointer">
+                                        <flux:badge :color="$user->is_active ? 'green' : 'red'" size="sm">
+                                            {{ $user->is_active ? 'Active' : 'Inactive' }}
+                                        </flux:badge>
+                                    </button>
+                                @endif
                             </td>
                             <td class="px-4 py-3 text-end">
-                                <flux:button wire:click="editUser({{ $user->id }})" size="sm" variant="ghost" icon="pencil"
-                                    aria-label="Edit {{ $user->name }}" />
+                                @if ($user->id !== auth()->id())
+                                    <flux:button wire:click="editUser({{ $user->id }})" size="sm" variant="ghost" icon="pencil"
+                                        aria-label="Edit {{ $user->name }}" />
+                                    <flux:button wire:click="confirmDeleteUser({{ $user->id }})" size="sm" variant="ghost" icon="trash"
+                                        class="text-red-500 hover:text-red-700" aria-label="Delete {{ $user->name }}" />
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -110,5 +120,18 @@
                 <flux:button type="submit" variant="primary">{{ $editingUserId ? 'Update' : 'Create' }}</flux:button>
             </div>
         </form>
+    </flux:modal>
+    {{-- Delete Confirmation Modal --}}
+    <flux:modal wire:model="showDeleteModal" class="max-w-sm md:min-w-sm">
+        <div class="space-y-4">
+            <flux:heading size="lg">Delete User</flux:heading>
+            <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                Are you sure you want to delete <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ $deletingUserName }}</span>? This action cannot be undone.
+            </p>
+            <div class="flex justify-end gap-2">
+                <flux:button wire:click="$set('showDeleteModal', false)" variant="ghost">Cancel</flux:button>
+                <flux:button wire:click="deleteUser({{ $deletingUserId }})" variant="danger">Delete</flux:button>
+            </div>
+        </div>
     </flux:modal>
 </flux:main>

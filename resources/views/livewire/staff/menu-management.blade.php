@@ -108,7 +108,7 @@
                                 <td class="px-4 py-3 text-end">
                                     <div class="flex justify-end gap-1">
                                         <flux:button wire:click="editProduct({{ $product->id }})" size="sm" variant="ghost" icon="pencil" aria-label="Edit {{ $product->name }}" />
-                                        <flux:button wire:click="deleteProduct({{ $product->id }})" wire:confirm="Delete {{ $product->name }}?" size="sm" variant="ghost" icon="trash" class="text-red-500 hover:text-red-700" aria-label="Delete {{ $product->name }}" />
+                                        <flux:button wire:click="confirmDelete({{ $product->id }}, 'product')" size="sm" variant="ghost" icon="trash" class="text-red-500 hover:text-red-700" aria-label="Delete {{ $product->name }}" />
                                     </div>
                                 </td>
                             </tr>
@@ -202,7 +202,7 @@
                                 <td class="px-4 py-3 text-end">
                                     <div class="flex justify-end gap-1">
                                         <flux:button wire:click="editCategory({{ $cat->id }})" size="sm" variant="ghost" icon="pencil" aria-label="Edit {{ $cat->name }}" />
-                                        <flux:button wire:click="deleteCategory({{ $cat->id }})" wire:confirm="Delete {{ $cat->name }}? This only works if it has no products." size="sm" variant="ghost" icon="trash" class="text-red-500 hover:text-red-700" aria-label="Delete {{ $cat->name }}" />
+                                        <flux:button wire:click="confirmDelete({{ $cat->id }}, 'category')" size="sm" variant="ghost" icon="trash" class="text-red-500 hover:text-red-700" aria-label="Delete {{ $cat->name }}" />
                                     </div>
                                 </td>
                             </tr>
@@ -231,4 +231,22 @@
             </form>
         </flux:modal>
     @endif
+    {{-- Delete Confirmation Modal --}}
+    <flux:modal wire:model="showDeleteModal" class="max-w-sm md:min-w-sm">
+        <div class="space-y-4">
+            <flux:heading size="lg">Delete {{ $deletingType === 'product' ? 'Product' : 'Category' }}</flux:heading>
+            <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                Are you sure you want to delete <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ $deletingName }}</span>?
+                @if ($deletingType === 'category')
+                    This only works if the category has no products.
+                @else
+                    This action cannot be undone.
+                @endif
+            </p>
+            <div class="flex justify-end gap-2">
+                <flux:button wire:click="$set('showDeleteModal', false)" variant="ghost">Cancel</flux:button>
+                <flux:button wire:click="deleteConfirmed" variant="danger">Delete</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </flux:main>
