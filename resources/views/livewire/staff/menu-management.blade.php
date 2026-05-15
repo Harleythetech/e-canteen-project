@@ -142,7 +142,6 @@
 
                 <div>
                     <flux:select wire:model.defer="productCategory" :label="__('Category')" placeholder="Select category..." required>
-                        <flux:select.option value="">Select category...</flux:select.option>
                         @foreach ($categoryOptions as $cat)
                             <flux:select.option value="{{ $cat->id }}">{{ $cat->name }}</flux:select.option>
                         @endforeach
