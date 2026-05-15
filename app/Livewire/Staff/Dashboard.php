@@ -91,15 +91,17 @@ class Dashboard extends Component
             'completed_today' => Order::completed()->whereDate('completed_at', today())->count(),
         ];
 
-        $topProducts = Product::withCount([
+        $topProducts = Product::withSum([
             'orderItems as today_sold' => function ($q) {
-                $q->whereHas('order', fn($oq) => $oq->whereDate('created_at', today())->whereNotNull('paid_at'));
+                $q->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->whereDate('orders.created_at', today())
+                    ->whereNotNull('orders.paid_at');
             }
-        ])
+        ], 'quantity')
             ->orderByDesc('today_sold')
             ->take(10)
             ->get()
-            ->filter(fn($p) => $p->today_sold > 0);
+            ->filter(fn($p) => ($p->today_sold ?? 0) > 0);
 
         // Hourly sales for today (line chart)
         $hourlySales = Order::whereDate('created_at', today())
