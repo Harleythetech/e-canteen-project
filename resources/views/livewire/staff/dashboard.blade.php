@@ -1,4 +1,19 @@
-<flux:main>
+<flux:main x-data="{
+    open: false,
+    order: null,
+    show(data) { this.order = data; this.open = true; },
+    close() { this.open = false; this.order = null; },
+    badgeClass(status) {
+        return {
+            'pending':   'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+            'paid':      'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+            'preparing': 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
+            'ready':     'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+            'completed': 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+            'cancelled': 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+        }[status] ?? 'bg-zinc-100 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-300';
+    }
+}" x-on:keydown.escape.window="close()">
     {{-- Stats strip --}}
     <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
@@ -191,26 +206,6 @@
         @endif
     @else
         {{-- Live Orders + QR Scanner side by side --}}
-        {{-- Alpine-powered order detail modal — lives outside Livewire's morph scope --}}
-        <div
-            x-data="{
-                open: false,
-                order: null,
-                show(data) { this.order = data; this.open = true; },
-                close() { this.open = false; this.order = null; },
-                badgeClass(status) {
-                    return {
-                        'pending':   'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
-                        'paid':      'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-                        'preparing': 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
-                        'ready':     'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
-                        'completed': 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
-                        'cancelled': 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-                    }[status] ?? 'bg-zinc-100 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-300';
-                }
-            }"
-            x-on:keydown.escape.window="close()"
-        >
         <div class="grid gap-6 lg:grid-cols-3">
             {{-- Live Orders (left, 2/3 width) --}}
             <div class="lg:col-span-2">
@@ -442,8 +437,7 @@
         </div>
     @endif
 
-    {{-- Order Detail Modal — inside x-data scope, fixed to viewport --}}
-    <template x-teleport="body">
+    {{-- Order Detail Modal --}}
     <div
         x-show="open"
         x-transition:enter="transition ease-out duration-200"
@@ -455,122 +449,121 @@
         style="position:fixed;inset:0;z-index:99999;"
         x-cloak
     >
-        {{-- Flex centering wrapper --}}
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1rem;">
         {{-- Backdrop --}}
         <div style="position:absolute;inset:0;background-color:rgba(0,0,0,0.15);" @click="close()"></div>
 
-        {{-- Panel --}}
-        <div
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="relative z-10 flex w-full max-w-lg flex-col rounded-2xl bg-white shadow-2xl dark:bg-zinc-900"
-            style="max-height: 90vh;"
-        >
-            <template x-if="order">
-                <div class="flex min-h-0 flex-col" style="max-height: 90vh;">
-                    {{-- Sticky Header --}}
-                    <div class="flex shrink-0 items-start justify-between gap-3 border-b border-zinc-200 px-6 py-4 dark:border-zinc-700">
-                        <div>
-                            <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100" x-text="order.order_number"></h2>
-                            <p class="text-sm text-zinc-500 dark:text-zinc-400" x-text="order.created_at"></p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="badgeClass(order.status)" x-text="order.status.charAt(0).toUpperCase() + order.status.slice(1)"></span>
-                            <button @click="close()" class="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-                    </div>
+        {{-- Centering wrapper --}}
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1rem;">
 
-                    {{-- Scrollable Body --}}
-                    <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
-                        {{-- Customer & Pickup --}}
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-                                <p class="mb-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">Customer</p>
-                                <p class="font-semibold text-zinc-900 dark:text-zinc-100" x-text="order.customer_name"></p>
-                                <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="order.customer_email"></p>
+            {{-- Panel --}}
+            <div
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="relative z-10 flex w-full max-w-lg flex-col rounded-2xl bg-white shadow-2xl dark:bg-zinc-900"
+                style="max-height: 90vh;"
+            >
+                <template x-if="order">
+                    <div class="flex min-h-0 flex-col" style="max-height: 90vh;">
+                        {{-- Sticky Header --}}
+                        <div class="flex shrink-0 items-start justify-between gap-3 border-b border-zinc-200 px-6 py-4 dark:border-zinc-700">
+                            <div>
+                                <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100" x-text="order.order_number"></h2>
+                                <p class="text-sm text-zinc-500 dark:text-zinc-400" x-text="order.created_at"></p>
                             </div>
-                            <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-                                <p class="mb-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">Pickup Time</p>
-                                <p class="font-semibold text-zinc-900 dark:text-zinc-100" x-text="order.pickup_time"></p>
-                                <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="order.payment_method"></p>
+                            <div class="flex items-center gap-2">
+                                <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="badgeClass(order.status)" x-text="order.status.charAt(0).toUpperCase() + order.status.slice(1)"></span>
+                                <button @click="close()" class="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                                </button>
                             </div>
                         </div>
 
-                        {{-- Special Instructions --}}
-                        <template x-if="order.special_instructions">
-                            <div class="rounded-lg border border-amber-300 bg-amber-500/10 p-3 dark:border-amber-600/50">
-                                <p class="mb-1.5 text-xs font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">⚠ Special Instructions</p>
-                                <p class="text-sm text-zinc-900 dark:text-zinc-100" x-text="order.special_instructions"></p>
+                        {{-- Scrollable Body --}}
+                        <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4">
+                            {{-- Customer & Pickup --}}
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+                                    <p class="mb-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">Customer</p>
+                                    <p class="font-semibold text-zinc-900 dark:text-zinc-100" x-text="order.customer_name"></p>
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="order.customer_email"></p>
+                                </div>
+                                <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+                                    <p class="mb-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">Pickup Time</p>
+                                    <p class="font-semibold text-zinc-900 dark:text-zinc-100" x-text="order.pickup_time"></p>
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="order.payment_method"></p>
+                                </div>
                             </div>
-                        </template>
-                        <template x-if="!order.special_instructions">
-                            <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-                                <p class="text-sm text-zinc-400 dark:text-zinc-500">No special instructions</p>
-                            </div>
-                        </template>
 
-                        {{-- Order Items --}}
-                        <div class="rounded-lg border border-zinc-200 dark:border-zinc-700">
-                            <div class="border-b border-zinc-200 px-3 py-2 dark:border-zinc-700">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Order Items</p>
-                            </div>
-                            <div class="divide-y divide-zinc-100 dark:divide-zinc-700">
-                                <template x-for="item in order.items" :key="item.name">
-                                    <div class="flex items-center justify-between px-3 py-2.5">
-                                        <div>
-                                            <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100" x-text="item.name"></p>
-                                            <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="item.unit + ' × ' + item.qty"></p>
+                            {{-- Special Instructions --}}
+                            <template x-if="order.special_instructions">
+                                <div class="rounded-lg border border-amber-300 bg-amber-500/10 p-3 dark:border-amber-600/50">
+                                    <p class="mb-1.5 text-xs font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">⚠ Special Instructions</p>
+                                    <p class="text-sm text-zinc-900 dark:text-zinc-100" x-text="order.special_instructions"></p>
+                                </div>
+                            </template>
+                            <template x-if="!order.special_instructions">
+                                <div class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
+                                    <p class="text-sm text-zinc-400 dark:text-zinc-500">No special instructions</p>
+                                </div>
+                            </template>
+
+                            {{-- Order Items --}}
+                            <div class="rounded-lg border border-zinc-200 dark:border-zinc-700">
+                                <div class="border-b border-zinc-200 px-3 py-2 dark:border-zinc-700">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Order Items</p>
+                                </div>
+                                <div class="divide-y divide-zinc-100 dark:divide-zinc-700">
+                                    <template x-for="item in order.items" :key="item.name">
+                                        <div class="flex items-center justify-between px-3 py-2.5">
+                                            <div>
+                                                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100" x-text="item.name"></p>
+                                                <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="item.unit + ' × ' + item.qty"></p>
+                                            </div>
+                                            <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100" x-text="item.subtotal"></span>
                                         </div>
-                                        <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100" x-text="item.subtotal"></span>
-                                    </div>
-                                </template>
-                            </div>
-                            <div class="flex items-center justify-between border-t border-zinc-200 px-3 py-2.5 dark:border-zinc-700">
-                                <span class="font-semibold text-zinc-900 dark:text-zinc-100">Total</span>
-                                <span class="font-bold text-orange-600" x-text="order.total"></span>
+                                    </template>
+                                </div>
+                                <div class="flex items-center justify-between border-t border-zinc-200 px-3 py-2.5 dark:border-zinc-700">
+                                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">Total</span>
+                                    <span class="font-bold text-orange-600" x-text="order.total"></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Sticky Footer --}}
-                    <div class="flex shrink-0 justify-between gap-2 border-t border-zinc-200 px-6 py-4 dark:border-zinc-700">
-                        <button @click="close()" class="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">
-                            Close
-                        </button>
-                        <template x-if="order.status === 'pending'">
-                            <button :wire:click="'advanceOrder(' + order.id + ')'" @click="close()" class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600">
-                                Mark Paid
+                        {{-- Sticky Footer --}}
+                        <div class="flex shrink-0 justify-between gap-2 border-t border-zinc-200 px-6 py-4 dark:border-zinc-700">
+                            <button @click="close()" class="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">
+                                Close
                             </button>
-                        </template>
-                        <template x-if="order.status === 'paid'">
-                            <button :wire:click="'advanceOrder(' + order.id + ')'" @click="close()" class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600">
-                                Start Preparing
-                            </button>
-                        </template>
-                        <template x-if="order.status === 'preparing'">
-                            <button :wire:click="'advanceOrder(' + order.id + ')'" @click="close()" class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600">
-                                Mark Ready
-                            </button>
-                        </template>
-                        <template x-if="order.status === 'ready'">
-                            <button :wire:click="'advanceOrder(' + order.id + ')'" @click="close()" class="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
-                                Complete
-                            </button>
-                        </template>
+                            <template x-if="order.status === 'pending'">
+                                <button @click="$wire.advanceOrder(order.id); close()" class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600">
+                                    Mark Paid
+                                </button>
+                            </template>
+                            <template x-if="order.status === 'paid'">
+                                <button @click="$wire.advanceOrder(order.id); close()" class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600">
+                                    Start Preparing
+                                </button>
+                            </template>
+                            <template x-if="order.status === 'preparing'">
+                                <button @click="$wire.advanceOrder(order.id); close()" class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600">
+                                    Mark Ready
+                                </button>
+                            </template>
+                            <template x-if="order.status === 'ready'">
+                                <button @click="$wire.advanceOrder(order.id); close()" class="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                                    Complete
+                                </button>
+                            </template>
+                        </div>
                     </div>
-                </div>
-            </template>
+                </template>
+            </div>
         </div>
     </div>
-        </div>{{-- end flex centering wrapper --}}
-    </div>
-    </template>{{-- end x-teleport --}}
-        </div>{{-- end Alpine order modal wrapper --}}
+
 </flux:main>
