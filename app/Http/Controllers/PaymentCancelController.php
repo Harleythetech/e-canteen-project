@@ -10,6 +10,19 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentCancelController extends Controller
 {
+    /**
+     * Handles the cancel_url redirect from PayMongo.
+     * This is called when the student closes or cancels the PayMongo payment page.
+     *
+     * Flow:
+     * 1. Make sure only the order owner can trigger this (403 otherwise).
+     * 2. Poll PayMongo one final time — sometimes PayMongo redirects to cancel_url
+     *    even after a successful payment (rare race condition). If payment is confirmed,
+     *    send the student to the confirmation page instead of cancelling.
+     * 3. If the order is still pending after polling, cancel it and restore stock,
+     *    then redirect back to checkout with the cart restored.
+     * 4. If the order is already paid or in another state, just show the order status page.
+     */
     public function __invoke(Request $request, Order $order, PayMongoService $payMongoService): RedirectResponse
     {
         // Only the order owner can cancel
@@ -21,11 +34,13 @@ class PaymentCancelController extends Controller
             try {
                 $paid = $payMongoService->confirmCheckoutSession($order);
                 if ($paid) {
+                    // Payment went through — send to confirmation instead of cancelling
                     $order->refresh();
                     return redirect()->route('orders.confirmed', $order)
                         ->with('success', 'Payment confirmed!');
                 }
             } catch (\Throwable $e) {
+                // Polling failed — not fatal, just log it and proceed with cancellation
                 Log::warning('PaymentCancel: polling failed', [
                     'order_number' => $order->order_number,
                     'error'        => $e->getMessage(),
@@ -33,7 +48,7 @@ class PaymentCancelController extends Controller
             }
         }
 
-        // Cancel the order if it's still pending
+        // Cancel the order if it's still pending and restore product stock
         if ($order->status === 'pending') {
             $order->load('items')->cancelAndRestoreStock();
 
@@ -41,7 +56,7 @@ class PaymentCancelController extends Controller
                 ->with('payment_cancelled', 'Your payment was cancelled. Your cart has been restored.');
         }
 
-        // Already paid or in another state — just send to order status
+        // Order is already paid or in another non-cancellable state — just show its status
         return redirect()->route('orders.show', $order);
     }
 }
