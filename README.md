@@ -1,4 +1,4 @@
-# PLSP E-Canteen — System Architecture
+# E-Canteen — System Architecture
 
 A Laravel-based online ordering system for the Pamantasan ng Lungsod ng San Pablo (PLSP) school canteen. Students browse the menu, add items to a cart, pay via PayMongo (GCash, Card, GrabPay, PayMaya), and pick up orders using QR codes scanned by staff.
 
