@@ -1,6 +1,44 @@
 <flux:main>
     <flux:heading size="xl" class="mb-6">Dashboard Overview</flux:heading>
 
+    {{-- Low Stock Alert --}}
+    @if ($lowStockProducts->isNotEmpty())
+        <div x-data="{ show: true }" x-show="show" x-transition.opacity class="mb-6 rounded-xl p-4 shadow-sm" style="background-color: #D0342C;">
+            <div class="mb-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <flux:icon.exclamation-triangle class="size-5 text-white" />
+                    <span class="text-sm font-bold text-white">Low Stock Alert</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white">
+                        {{ $lowStockProducts->count() }} {{ Str::plural('item', $lowStockProducts->count()) }} need restocking
+                    </span>
+                    <button @click="show = false" class="rounded-md p-1 text-white/70 transition hover:bg-white/20 hover:text-white" aria-label="Dismiss">
+                        <flux:icon.x-mark class="size-4" />
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach ($lowStockProducts as $product)
+                    <div class="flex items-center justify-between rounded-lg bg-white/10 px-3 py-2">
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-semibold text-white">{{ $product->name }}</p>
+                            <p class="text-xs text-white/70">{{ $product->category->name ?? 'Uncategorized' }}</p>
+                        </div>
+                        <div class="ml-3 shrink-0 text-right">
+                            @if ($product->stock === 0)
+                                <span class="rounded-md bg-white px-2 py-0.5 text-xs font-bold" style="color: #D0342C;">OUT OF STOCK</span>
+                            @else
+                                <span class="text-sm font-bold text-white">{{ $product->stock }}</span>
+                                <p class="text-xs text-white/70">remaining</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- Stats grid --}}
     <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-800">
@@ -252,23 +290,6 @@
                 </div>
             @endif
 
-            {{-- Low stock alert --}}
-            @if ($lowStockProducts->isNotEmpty())
-                <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
-                    <div class="mb-3 flex items-center gap-2">
-                        <flux:icon.exclamation-triangle class="size-4 text-amber-600" />
-                        <flux:heading size="sm" class="text-amber-800 dark:text-amber-400">Low Stock Alert</flux:heading>
-                    </div>
-                    <div class="space-y-2">
-                        @foreach ($lowStockProducts as $product)
-                            <div class="flex justify-between text-sm">
-                                <span class="text-amber-700 dark:text-amber-300">{{ $product->name }}</span>
-                                <span class="font-bold text-red-600">{{ $product->stock }} left</span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 </flux:main>

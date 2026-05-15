@@ -3,25 +3,61 @@
         <flux:heading size="xl">Menu Management</flux:heading>
     </div>
 
+    {{-- Low Stock Alert --}}
+    @if ($lowStockProducts->isNotEmpty())
+        <div class="mb-6 rounded-xl p-4 shadow-sm" style="background-color: #D0342C;">
+            <div class="mb-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <flux:icon.exclamation-triangle class="size-5 text-white" />
+                    <span class="text-sm font-bold text-white">Low Stock Alert</span>
+                </div>
+                <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white">
+                    {{ $lowStockProducts->count() }} {{ Str::plural('item', $lowStockProducts->count()) }} need restocking
+                </span>
+            </div>
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach ($lowStockProducts as $product)
+                    <div class="flex items-center justify-between rounded-lg bg-white/10 px-3 py-2">
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-semibold text-white">{{ $product->name }}</p>
+                            <p class="text-xs text-white/70">{{ $product->category->name ?? 'Uncategorized' }}</p>
+                        </div>
+                        <div class="ml-3 shrink-0 text-right">
+                            @if ($product->stock === 0)
+                                <span class="rounded-md bg-white px-2 py-0.5 text-xs font-bold" style="color: #D0342C;">OUT OF STOCK</span>
+                            @else
+                                <span class="text-sm font-bold text-white">{{ $product->stock }}</span>
+                                <p class="text-xs text-white/70">remaining</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- Tabs --}}
-    <div class="mb-6 flex gap-2">
-        <button wire:click="$set('activeTab', 'products')" @class([
-            'rounded-full px-4 py-2 text-sm font-medium transition',
-            'bg-orange-500 text-white' => $activeTab === 'products',
-            'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-300' => $activeTab !== 'products',
-        ])>Products</button>
-        <button wire:click="$set('activeTab', 'categories')" @class([
-            'rounded-full px-4 py-2 text-sm font-medium transition',
-            'bg-orange-500 text-white' => $activeTab === 'categories',
-            'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-300' => $activeTab !== 'categories',
-        ])>Categories</button>
+    <div class="mb-6 flex items-center justify-between gap-2">
+        <div class="flex gap-2">
+            <button wire:click="$set('activeTab', 'products')" @class([
+                'rounded-full px-4 py-2 text-sm font-medium transition',
+                'bg-orange-500 text-white' => $activeTab === 'products',
+                'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-300' => $activeTab !== 'products',
+            ])>Products</button>
+            <button wire:click="$set('activeTab', 'categories')" @class([
+                'rounded-full px-4 py-2 text-sm font-medium transition',
+                'bg-orange-500 text-white' => $activeTab === 'categories',
+                'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-300' => $activeTab !== 'categories',
+            ])>Categories</button>
+        </div>
+        @if ($activeTab === 'products')
+            <flux:button wire:click="createProduct" variant="primary" icon="plus">Add Product</flux:button>
+        @elseif ($activeTab === 'categories')
+            <flux:button wire:click="createCategory" variant="primary" icon="plus">Add Category</flux:button>
+        @endif
     </div>
 
     @if ($activeTab === 'products')
-        {{-- Products --}}
-        <div class="mb-4 flex justify-end">
-            <flux:button wire:click="createProduct" variant="primary" icon="plus">Add Product</flux:button>
-        </div>
 
         <div class="rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
             <div class="overflow-x-auto">
@@ -141,9 +177,6 @@
         </flux:modal>
     @else
         {{-- Categories --}}
-        <div class="mb-4 flex justify-end">
-            <flux:button wire:click="createCategory" variant="primary" icon="plus">Add Category</flux:button>
-        </div>
 
         <div class="rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
             <div class="overflow-x-auto">

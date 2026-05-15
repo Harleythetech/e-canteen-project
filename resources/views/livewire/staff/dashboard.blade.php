@@ -34,6 +34,39 @@
         </div>
     </div>
 
+    {{-- Low Stock Alert (always visible) --}}
+    @if ($lowStockProducts->isNotEmpty())
+        <div class="mb-6 rounded-xl p-4 shadow-sm" style="background-color: #D0342C;">
+            <div class="mb-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <flux:icon.exclamation-triangle class="size-5 text-white" />
+                    <span class="text-sm font-bold text-white">Low Stock Alert</span>
+                </div>
+                <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white">
+                    {{ $lowStockProducts->count() }} {{ Str::plural('item', $lowStockProducts->count()) }} need restocking
+                </span>
+            </div>
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach ($lowStockProducts as $product)
+                    <div class="flex items-center justify-between rounded-lg bg-white/10 px-3 py-2">
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-semibold text-white">{{ $product->name }}</p>
+                            <p class="text-xs text-white/70">{{ $product->category->name ?? 'Uncategorized' }}</p>
+                        </div>
+                        <div class="ml-3 shrink-0 text-right">
+                            @if ($product->stock === 0)
+                                <span class="rounded-md bg-white px-2 py-0.5 text-xs font-bold" style="color: #D0342C;">OUT OF STOCK</span>
+                            @else
+                                <span class="text-sm font-bold text-white">{{ $product->stock }}</span>
+                                <p class="text-xs text-white/70">remaining</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     @if ($tab === 'stats')
         {{-- Product Statistics --}}
         <flux:heading size="lg" class="mb-4">Product Statistics — Today</flux:heading>

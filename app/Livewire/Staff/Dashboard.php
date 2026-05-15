@@ -123,10 +123,15 @@ class Dashboard extends Component
 
         // Stock distribution for all products (doughnut)
         $stockDistribution = [
-            'Critical (0-5)' => Product::where('is_available', true)->where('stock', '<=', 5)->count(),
-            'Low (6-15)' => Product::where('is_available', true)->whereBetween('stock', [6, 15])->count(),
-            'Healthy (16+)' => Product::where('is_available', true)->where('stock', '>', 15)->count(),
+            'Critical (0-5)' => Product::where('stock', '<=', 5)->count(),
+            'Low (6-15)'     => Product::whereBetween('stock', [6, 15])->count(),
+            'Healthy (16+)'  => Product::where('stock', '>', 15)->count(),
         ];
+
+        $lowStockProducts = Product::with('category')
+            ->where('stock', '<=', 5)
+            ->orderBy('stock')
+            ->get();
 
         return view('livewire.staff.dashboard', [
             'orders' => $orders,
@@ -136,6 +141,7 @@ class Dashboard extends Component
             'hourlyRevenue' => $hourlyRevenue,
             'hourlyOrders' => $hourlyOrders,
             'stockDistribution' => $stockDistribution,
+            'lowStockProducts' => $lowStockProducts,
         ]);
     }
 }

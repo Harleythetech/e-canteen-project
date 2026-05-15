@@ -23,7 +23,7 @@ class Overview extends Component
             'active_orders' => Order::active()->count(),
             'total_students' => User::where('role', 'student')->count(),
             'total_products' => Product::count(),
-            'low_stock' => Product::where('stock', '<=', 5)->where('is_available', true)->count(),
+            'low_stock' => Product::where('stock', '<=', 5)->count(),
         ];
 
         $recentOrders = Order::with('user')
@@ -31,10 +31,9 @@ class Overview extends Component
             ->take(10)
             ->get();
 
-        $lowStockProducts = Product::where('stock', '<=', 5)
-            ->where('is_available', true)
+        $lowStockProducts = Product::with('category')
+            ->where('stock', '<=', 5)
             ->orderBy('stock')
-            ->take(5)
             ->get();
 
         // 7-day revenue trend

@@ -233,6 +233,10 @@ class MenuManagement extends Component
             'products' => Product::with('category')->orderBy('sort_order')->get(),
             'categories' => Category::withCount('products')->orderBy('sort_order')->get(),
             'categoryOptions' => Category::active()->orderBy('name')->get(),
+            'lowStockProducts' => Product::with('category')
+                ->where('stock', '<=', 5)
+                ->orderBy('stock')
+                ->get(),
         ]);
     }
 }
