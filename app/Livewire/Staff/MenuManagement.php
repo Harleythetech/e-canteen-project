@@ -61,14 +61,20 @@ class MenuManagement extends Component
 
     public function saveProduct(): void
     {
+        $nameUnique = $this->editingProductId
+            ? "unique:products,name,{$this->editingProductId}"
+            : 'unique:products,name';
+
         $this->validate([
-            'productName'        => 'required|string|max:255',
+            'productName'        => ['required', 'string', 'max:255', $nameUnique],
             'productCategory'    => 'required|exists:categories,id',
             'productDescription' => 'nullable|string|max:500',
             'productPrice'       => 'required|numeric|min:1|max:99999',
             'productStock'       => 'required|integer|min:0',
             'productImage'       => 'nullable|image|max:2048',
-        ], [], [
+        ], [
+            'productName.unique' => 'A product with this name already exists.',
+        ], [
             'productName'        => 'product name',
             'productCategory'    => 'category',
             'productDescription' => 'description',
@@ -148,8 +154,14 @@ class MenuManagement extends Component
 
     public function saveCategory(): void
     {
+        $nameUnique = $this->editingCategoryId
+            ? "unique:categories,name,{$this->editingCategoryId}"
+            : 'unique:categories,name';
+
         $this->validate([
-            'categoryName' => 'required|string|max:255',
+            'categoryName' => ['required', 'string', 'max:255', $nameUnique],
+        ], [
+            'categoryName.unique' => 'A category with this name already exists.',
         ]);
 
         $data = [
