@@ -3,7 +3,7 @@
 
 <head>
     @include('partials.head')
-    <title>PLSP E-Canteen — Skip the line. Order ahead.</title>
+    <title>E-Canteen — Skip the line. Order ahead.</title>
 </head>
 
 <body class="min-h-screen bg-orange-50/50 antialiased dark:bg-zinc-950">
@@ -19,7 +19,7 @@
         <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4" aria-label="Primary navigation">
             <div class="flex items-center gap-2">
                 <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500" aria-hidden="true">
-                    <span class="text-lg font-bold text-white">P</span>
+                    <x-app-logo-icon class="size-5 stroke-white" />
                 </div>
                 <div>
                     <span class="block text-lg font-bold text-zinc-900 dark:text-zinc-100">E-CANTEEN</span>
@@ -78,10 +78,6 @@
                                     d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                             </svg>
                         </a>
-                        <a href="{{ route('staff.login') }}"
-                            class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-7 py-3 text-base font-semibold text-zinc-800 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700">
-                            Staff Portal
-                        </a>
                     </div>
                 </div>
 
@@ -91,19 +87,17 @@
                         {{-- Card --}}
                         <div class="overflow-hidden rounded-2xl border border-zinc-100 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"
                             style="box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
-                            <div class="mb-4 flex items-start justify-between">
+                            <div class="mb-4 flex items-center justify-between">
                                 <div>
-                                    <p style="font-size: 11px;" class="text-zinc-400 dark:text-zinc-500">Average wait
-                                    </p>
+                                    <p style="font-size: 11px;" class="text-zinc-400 dark:text-zinc-500">Average wait</p>
                                     <p class="text-3xl font-bold text-zinc-900 dark:text-zinc-100">2<span
                                             class="text-sm font-medium text-zinc-400 dark:text-zinc-500">min</span></p>
                                 </div>
                                 <div class="text-right">
                                     <p style="font-size: 11px;" class="text-zinc-400 dark:text-zinc-500">Order #2847</p>
-                                    <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Ready to Pickup
-                                    </p>
+                                    <p class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Ready to Pickup</p>
                                 </div>
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-500"
+                                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500"
                                     style="box-shadow: 0 4px 12px rgba(34,197,94,0.3);">
                                     <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="none"
                                         viewBox="0 0 24 24" stroke-width="3" stroke="white">
@@ -141,7 +135,7 @@
                             <div
                                 class="flex-1 rounded-xl border border-zinc-100 bg-orange-50/30 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900">
                                 <p style="font-size: 11px;" class="text-zinc-400 dark:text-zinc-500">Orders today</p>
-                                <p class="text-2xl font-bold text-green-600 dark:text-green-400">143</p>
+                                <p class="text-sm font-bold text-green-600 dark:text-green-400">143</p>
                             </div>
                         </div>
                     </div>
@@ -206,7 +200,7 @@
                 style="box-shadow: 0 10px 40px rgba(249,115,22,0.2);">
                 <h2 id="cta-heading" class="text-3xl font-bold text-white">Ready to skip the line?</h2>
                 <p class="mt-3 text-base text-orange-100">Join hundreds of students and staff
-                    using PLSP E-Canteen every day.</p>
+                    using E-Canteen every day.</p>
                 <a href="{{ route('register') }}"
                     class="mt-8 inline-flex items-center gap-2 rounded-full border-2 border-white bg-white px-7 py-3 text-base font-semibold text-orange-600 hover:bg-orange-50">
                     Create Free Account
@@ -224,10 +218,10 @@
         <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
             <div class="flex items-center gap-2">
                 <div class="flex h-7 w-7 items-center justify-center rounded-md bg-orange-500" aria-hidden="true">
-                    <span class="text-xs font-bold text-white">P</span>
+                    <x-app-logo-icon class="size-4 stroke-white" />
                 </div>
                 <div>
-                    <p class="text-sm font-bold text-zinc-900 dark:text-zinc-100">PLSP E-Canteen</p>
+                    <p class="text-sm font-bold text-zinc-900 dark:text-zinc-100">E-Canteen</p>
                     <p class="text-xs text-zinc-400 dark:text-zinc-500">&copy; {{ date('Y') }} All rights reserved.</p>
                 </div>
             </div>
