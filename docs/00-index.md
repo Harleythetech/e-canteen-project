@@ -1,4 +1,4 @@
-# PLSP E-Canteen — Documentation Index
+# E-Canteen — Documentation Index
 
 A web-based online ordering system for the Pamantasan ng Lungsod ng San Pablo (PLSP) school canteen.
 
@@ -52,6 +52,9 @@ A web-based online ordering system for the Pamantasan ng Lungsod ng San Pablo (P
 | `/admin` | Admin overview |
 | `/admin/users` | Admin user management |
 | `/admin/reports` | Admin sales reports |
+| `/privacy` | Privacy Policy |
+| `/terms` | Terms of Service |
+| `/support` | Support & FAQ |
 | `/webhooks/paymongo` | PayMongo webhook endpoint |
 
 ### Order Status Flow

@@ -58,6 +58,32 @@ Used by: `Admin\Overview`, `Admin\UserManagement`, `Admin\SalesReports`
 
 ---
 
+## Welcome Page (`welcome.blade.php`)
+
+The public landing page. Not a Livewire component — plain Blade with no layout wrapper.
+
+- **Navbar** — App logo (using `<x-app-logo-icon>`), Sign In and Get Started links (or Dashboard link if authenticated)
+- **Hero section** — Headline, CTA button (Order Now → `/register`), and a decorative order card mockup
+- **How it works** — Three-step explainer (Browse, Pay, Pickup)
+- **CTA banner** — Secondary call to action
+- **Footer** — Copyright and links to Privacy, Terms, and Support pages
+
+---
+
+## Static Pages
+
+Three standalone public pages sharing the same navbar/footer style as the welcome page:
+
+| Route | View | Purpose |
+|---|---|---|
+| `/privacy` | `pages/privacy.blade.php` | Privacy Policy |
+| `/terms` | `pages/terms.blade.php` | Terms of Service |
+| `/support` | `pages/support.blade.php` | Support contacts and FAQ |
+
+Each page highlights its own link as active in the footer and links to the other two.
+
+---
+
 ## Shared Head Partial (`partials/head.blade.php`)
 
 Included in all layouts. Contains:
@@ -85,7 +111,7 @@ Included in all three layouts just before `@fluxScripts`. See [Toast Notificatio
 | `flux:textarea` | Special instructions field |
 | `flux:select` | Category dropdowns, role selectors, pickup time |
 | `flux:checkbox` | Availability toggles, active flags |
-| `flux:modal` | Product/category/user edit forms |
+| `flux:modal` | Product/category/user edit and delete confirmation forms |
 | `flux:badge` | Status indicators, role labels |
 | `flux:heading` / `flux:subheading` | Page and section titles |
 | `flux:callout` | Warning/error banners (payment cancelled, etc.) |

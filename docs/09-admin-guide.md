@@ -60,11 +60,16 @@ Password requirements: min 8 characters, uppercase, lowercase, number, and symbo
 3. Leave password blank to keep the existing password
 4. Click **Update**
 
+> The pencil and trash icons are hidden for your own account — use the Settings pages to manage your own profile and password.
+
+### Deleting a User
+Click the trash icon on any row. A confirmation modal will appear before the deletion is carried out. You cannot delete your own account.
+
 ### Activating / Deactivating Users
 Click the green/red status badge in the Status column to toggle a user's active status.
 
 - **Deactivated users** are immediately logged out on their next request and cannot log back in
-- You cannot deactivate your own account
+- You cannot deactivate your own account — the badge on your own row is non-interactive
 
 ---
 

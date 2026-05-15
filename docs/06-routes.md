@@ -9,6 +9,9 @@ All routes are defined in `routes/web.php`.
 | Method | URI | View | Name |
 |---|---|---|---|
 | GET | `/` | `welcome` | `home` |
+| GET | `/privacy` | `pages.privacy` | `privacy` |
+| GET | `/terms` | `pages.terms` | `terms` |
+| GET | `/support` | `pages.support` | `support` |
 
 ---
 

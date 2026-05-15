@@ -1,4 +1,4 @@
-# PLSP E-Canteen — System Overview
+# E-Canteen — System Overview
 
 A web-based online ordering system for the **Pamantasan ng Lungsod ng San Pablo (PLSP)** school canteen. Students browse the menu, add items to a cart, pay via PayMongo (GCash, Card, GrabPay, PayMaya), and pick up orders using QR codes scanned by staff.
 
@@ -57,6 +57,7 @@ resources/views/
 ├── layouts/                # student.blade.php, staff.blade.php, admin.blade.php
 ├── livewire/               # Blade templates for each Livewire component
 ├── pages/auth/             # Login, register, 2FA, password reset pages
+├── pages/                  # Static pages: privacy.blade.php, terms.blade.php, support.blade.php
 └── components/             # Shared Blade components (toast, app-logo, etc.)
 
 database/

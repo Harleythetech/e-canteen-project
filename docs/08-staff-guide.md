@@ -118,7 +118,7 @@ The products table shows all products with their category, price, stock, and ava
 Click the green/red badge in the Status column to instantly toggle a product's availability without editing the full form. Unavailable products are hidden from the student menu.
 
 **Deleting a Product:**
-Click the trash icon and confirm. This permanently deletes the product.
+Click the trash icon and confirm in the modal that appears. This permanently deletes the product.
 
 ### Categories Tab
 
@@ -132,7 +132,7 @@ Click the trash icon and confirm. This permanently deletes the product.
 Click the pencil icon to rename or toggle active status.
 
 **Deleting a Category:**
-Only possible if the category has no products. The system will show an error if you try to delete a category with products.
+Click the trash icon and confirm in the modal that appears. Only possible if the category has no products. The system will show an error if you try to delete a category with products.
 
 ---
 
