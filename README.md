@@ -8,7 +8,7 @@ A Laravel-based online ordering system for the Pamantasan ng Lungsod ng San Pabl
 
 | Layer         | Technology                                                     |
 | ------------- | -------------------------------------------------------------- |
-| **Backend**   | Laravel 13 (PHP 8.3+)                                         |
+| **Backend**   | Laravel 13 (PHP 8.4+)                                         |
 | **Frontend**  | Livewire 4 + Flux UI + Alpine.js (ships with Livewire)        |
 | **Styling**   | Tailwind CSS 4 (via `@tailwindcss/vite`)                      |
 | **JS Libs**   | Chart.js (dashboard charts), html5-qrcode (QR scanner)        |
@@ -99,15 +99,16 @@ In a traditional Laravel app, Controllers handle HTTP requests. Here, **Livewire
 | `OrderHistory`              | `app/Livewire/OrderHistory.php`      | Student  | List orders with active/completed filter  |
 | `OrderStatus`               | `app/Livewire/OrderStatus.php`       | Student  | View order detail + QR code for pickup    |
 | `Staff\Dashboard`           | `app/Livewire/Staff/Dashboard.php`   | Staff    | Order queue, advance statuses, QR scanner |
+| `Staff\MenuManagement`      | `app/Livewire/Staff/MenuManagement.php` | Staff | Product + category CRUD                   |
 | `Admin\Overview`            | `app/Livewire/Admin/Overview.php`    | Admin    | Dashboard stats, charts, low stock alerts |
-| `Admin\MenuManagement`      | `app/Livewire/Admin/MenuManagement.php` | Admin | Product + category CRUD                   |
 | `Admin\UserManagement`      | `app/Livewire/Admin/UserManagement.php` | Admin | User CRUD + activation toggle             |
 | `Admin\SalesReports`        | `app/Livewire/Admin/SalesReports.php`| Admin    | Revenue reports by period                 |
 
-There is also **one traditional Controller**:
+There are also **two traditional Controllers**:
 
 | Controller                    | File                                              | Purpose                            |
 | ----------------------------- | ------------------------------------------------- | ---------------------------------- |
+| `PaymentCancelController`    | `app/Http/Controllers/PaymentCancelController.php` | Handles payment cancellation, polls PayMongo before cancelling, restores cart |
 | `PayMongoWebhookController`  | `app/Http/Controllers/PayMongoWebhookController.php` | Receives PayMongo payment webhooks |
 
 This is an invokable controller because webhooks are server-to-server HTTP calls — they don't render UI, so Livewire isn't appropriate.
@@ -192,32 +193,41 @@ Used in routes as `role:staff,admin` or `role:admin`.
 
 ## Routes
 
+### Public Routes (no auth)
+
+| Method | URI         | Handler          | Name       |
+| ------ | ----------- | ---------------- | ---------- |
+| GET    | `/`         | `welcome` view   | `home`     |
+| GET    | `/privacy`  | `pages.privacy`  | `privacy`  |
+| GET    | `/terms`    | `pages.terms`    | `terms`    |
+| GET    | `/support`  | `pages.support`  | `support`  |
+
 ### Student Routes (auth required)
 
-| Method | URI                          | Handler            | Name               |
-| ------ | ---------------------------- | ------------------ | ------------------ |
-| GET    | `/`                          | `welcome` view     | `home`             |
-| GET    | `/dashboard`                 | Role-based redirect| `dashboard`        |
-| GET    | `/menu`                      | `MenuBrowser`      | `menu`             |
-| GET    | `/checkout`                  | `Checkout`         | `checkout`         |
-| GET    | `/orders`                    | `OrderHistory`     | `orders.index`     |
-| GET    | `/orders/{order}`            | `OrderStatus`      | `orders.show`      |
-| GET    | `/orders/{order}/confirmed`  | `OrderConfirmed`   | `orders.confirmed` |
+| Method | URI                                   | Handler                    | Name                        |
+| ------ | ------------------------------------- | -------------------------- | --------------------------- |
+| GET    | `/dashboard`                          | Role-based redirect        | `dashboard`                 |
+| GET    | `/menu`                               | `MenuBrowser`              | `menu`                      |
+| GET    | `/checkout`                           | `Checkout`                 | `checkout`                  |
+| GET    | `/orders`                             | `OrderHistory`             | `orders.index`              |
+| GET    | `/orders/{order}`                     | `OrderStatus`              | `orders.show`               |
+| GET    | `/orders/{order}/confirmed`           | `OrderConfirmed`           | `orders.confirmed`          |
+| GET    | `/orders/{order}/payment-cancelled`   | `PaymentCancelController`  | `orders.payment-cancelled`  |
 
 ### Staff Routes (`role:staff,admin`)
 
-| Method | URI      | Handler            | Name              |
-| ------ | -------- | ------------------ | ----------------- |
-| GET    | `/staff` | `Staff\Dashboard`  | `staff.dashboard` |
+| Method | URI           | Handler                  | Name              |
+| ------ | ------------- | ------------------------ | ----------------- |
+| GET    | `/staff`      | `Staff\Dashboard`        | `staff.dashboard` |
+| GET    | `/staff/menu` | `Staff\MenuManagement`   | `staff.menu`      |
 
 ### Admin Routes (`role:admin`)
 
-| Method | URI             | Handler                 | Name              |
-| ------ | --------------- | ----------------------- | ----------------- |
-| GET    | `/admin`        | `Admin\Overview`        | `admin.dashboard` |
-| GET    | `/admin/menu`   | `Admin\MenuManagement`  | `admin.menu`      |
-| GET    | `/admin/users`  | `Admin\UserManagement`  | `admin.users`     |
-| GET    | `/admin/reports` | `Admin\SalesReports`   | `admin.reports`   |
+| Method | URI              | Handler                 | Name              |
+| ------ | ---------------- | ----------------------- | ----------------- |
+| GET    | `/admin`         | `Admin\Overview`        | `admin.dashboard` |
+| GET    | `/admin/users`   | `Admin\UserManagement`  | `admin.users`     |
+| GET    | `/admin/reports` | `Admin\SalesReports`    | `admin.reports`   |
 
 ### Webhook (no auth/CSRF)
 
@@ -317,6 +327,8 @@ User                          Fortify                      System
 | Student | `student@example.com` | `password` |
 | Staff   | `staff@example.com`   | `password` |
 | Admin   | `admin@example.com`   | `password` |
+
+> Seeded passwords are set directly via `Hash::make()` and bypass validation. When registering new accounts manually, the password must be at least 8 characters and include uppercase, lowercase, a number, and a symbol (e.g. `Password1!`).
 
 **Categories:** Meals, Snacks, Beverages, Desserts
 
