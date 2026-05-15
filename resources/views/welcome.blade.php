@@ -226,11 +226,11 @@
                 </div>
             </div>
             <nav class="flex gap-6" aria-label="Footer">
-                <a href="#"
+                <a href="{{ route('privacy') }}"
                     class="text-sm text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300">Privacy</a>
-                <a href="#"
+                <a href="{{ route('terms') }}"
                     class="text-sm text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300">Terms</a>
-                <a href="#"
+                <a href="{{ route('support') }}"
                     class="text-sm text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300">Support</a>
             </nav>
         </div>
