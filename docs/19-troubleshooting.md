@@ -12,6 +12,17 @@ Look for the `status` and `payments_count` values in the log. If `payments_count
 
 ---
 
+### 500 error on `/orders/{id}/payment-cancelled`
+
+**Cause:** `PaymentCancelController` was missing the `use Illuminate\Http\Request;` import. PHP couldn't resolve the `Request` type hint in the `__invoke` method signature, causing a binding resolution exception.
+
+**Fix applied:** Added the missing import to `app/Http/Controllers/PaymentCancelController.php`:
+```php
+use Illuminate\Http\Request;
+```
+
+---
+
 ### "Payment processing failed. Please try again."
 
 **Cause:** The PayMongo API call to create a checkout session failed.
@@ -116,6 +127,20 @@ Look for the `status` and `payments_count` values in the log. If `payments_count
 **Cause (historical):** This was caused by `wire:poll` triggering a full Livewire re-render that morphed the modal content.
 
 **Current fix:** The modal is built with pure Alpine.js and stores order data as a JavaScript object. Livewire re-renders cannot affect it. The orders list refreshes via `setInterval(() => $wire.refreshOrders(), 5000)` which calls a no-op method that triggers a re-render without resetting Alpine state.
+
+---
+
+## CI / GitHub Actions Issues
+
+### Tests workflow fails with "your PHP version does not satisfy that requirement"
+
+**Cause:** The test matrix included PHP `8.3`, but Laravel 13 requires PHP ≥ 8.4. Composer fails to install dependencies on the `8.3` runner.
+
+**Fix applied:**
+- Removed `8.3` from the `php-version` matrix in `.github/workflows/tests.yml`
+- Updated the `php` constraint in `composer.json` from `^8.3` to `^8.4`
+
+The linter workflow was unaffected because it hardcodes `8.4` rather than using the matrix.
 
 ---
 
