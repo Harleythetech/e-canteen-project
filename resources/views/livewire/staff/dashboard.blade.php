@@ -443,6 +443,7 @@
     @endif
 
     {{-- Order Detail Modal — inside x-data scope, fixed to viewport --}}
+    <template x-teleport="body">
     <div
         x-show="open"
         x-transition:enter="transition ease-out duration-200"
@@ -451,11 +452,13 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+        style="position:fixed;inset:0;z-index:99999;"
         x-cloak
     >
+        {{-- Flex centering wrapper --}}
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1rem;">
         {{-- Backdrop --}}
-        <div class="absolute inset-0 bg-black/60" @click="close()"></div>
+        <div style="position:absolute;inset:0;background-color:rgba(0,0,0,0.15);" @click="close()"></div>
 
         {{-- Panel --}}
         <div
@@ -566,5 +569,8 @@
             </template>
         </div>
     </div>
+        </div>{{-- end flex centering wrapper --}}
+    </div>
+    </template>{{-- end x-teleport --}}
         </div>{{-- end Alpine order modal wrapper --}}
 </flux:main>
