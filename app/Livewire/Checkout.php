@@ -75,7 +75,11 @@ class Checkout extends Component
 
     public function updateQuantity(int $productId, int $quantity): void
     {
-        app(CartService::class)->update($productId, $quantity);
+        try {
+            app(CartService::class)->update($productId, $quantity);
+        } catch (\InvalidArgumentException $e) {
+            $this->dispatch('toast', type: 'error', message: $e->getMessage());
+        }
     }
 
     public function removeItem(int $productId): void

@@ -97,7 +97,7 @@ class MenuManagement extends Component
             'description'  => $this->productDescription ?: null,
             'price'        => $this->productPrice,
             'stock'        => $this->productStock,
-            'is_available' => $this->productAvailable,
+            'is_available' => (int) $this->productStock > 0 ? $this->productAvailable : false,
         ];
 
         if ($this->productImage) {
@@ -121,6 +121,12 @@ class MenuManagement extends Component
     public function toggleProductAvailability(int $id): void
     {
         $product = Product::findOrFail($id);
+
+        if ($product->stock === 0) {
+            $this->dispatch('toast', type: 'error', message: "Cannot mark {$product->name} as available — stock is 0.");
+            return;
+        }
+
         $product->update(['is_available' => !$product->is_available]);
         $status = $product->is_available ? 'available' : 'unavailable';
         $this->dispatch('toast', type: 'success', message: "{$product->name} marked as {$status}.");

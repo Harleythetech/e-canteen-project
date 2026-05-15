@@ -22,10 +22,15 @@ class MenuBrowser extends Component
     public function addToCart(int $productId, int $quantity = 1): void
     {
         $product = \App\Models\Product::find($productId);
-        app(CartService::class)->add($productId, $quantity);
-        $this->dispatch('cart-updated');
         $name = $product?->name ?? 'Item';
-        $this->dispatch('toast', type: 'success', message: "{$name} added to cart.");
+
+        try {
+            app(CartService::class)->add($productId, $quantity);
+            $this->dispatch('cart-updated');
+            $this->dispatch('toast', type: 'success', message: "{$name} added to cart.");
+        } catch (\InvalidArgumentException $e) {
+            $this->dispatch('toast', type: 'error', message: $e->getMessage());
+        }
     }
 
     public function removeFromCart(int $productId): void
@@ -39,8 +44,12 @@ class MenuBrowser extends Component
 
     public function updateCartQuantity(int $productId, int $quantity): void
     {
-        app(CartService::class)->update($productId, $quantity);
-        $this->dispatch('cart-updated');
+        try {
+            app(CartService::class)->update($productId, $quantity);
+            $this->dispatch('cart-updated');
+        } catch (\InvalidArgumentException $e) {
+            $this->dispatch('toast', type: 'error', message: $e->getMessage());
+        }
     }
 
     public function render()

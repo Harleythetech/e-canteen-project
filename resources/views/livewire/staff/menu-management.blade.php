@@ -59,10 +59,14 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <button wire:click="toggleProductAvailability({{ $product->id }})" class="cursor-pointer">
-                                        <flux:badge :color="$product->is_available ? 'green' : 'red'" size="sm">
-                                            {{ $product->is_available ? 'Available' : 'Unavailable' }}
-                                        </flux:badge>
+                                    <button wire:click="toggleProductAvailability({{ $product->id }})" class="cursor-pointer" @disabled($product->stock === 0)>
+                                        @if ($product->stock === 0)
+                                            <flux:badge color="zinc" size="sm">Out of Stock</flux:badge>
+                                        @else
+                                            <flux:badge :color="$product->is_available ? 'green' : 'red'" size="sm">
+                                                {{ $product->is_available ? 'Available' : 'Unavailable' }}
+                                            </flux:badge>
+                                        @endif
                                     </button>
                                 </td>
                                 <td class="px-4 py-3 text-end">
